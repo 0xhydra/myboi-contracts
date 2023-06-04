@@ -21,5 +21,6 @@ abstract contract ERC721URIStorage is IERC721URIStorage, ERC721 {
 
     function _setBaseURI(string memory baseUri_) internal virtual {
         _baseUri = baseUri_;
+        emit NewBaseTokenURI(baseUri_);
     }
 }

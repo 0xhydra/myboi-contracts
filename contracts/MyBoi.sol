@@ -25,10 +25,17 @@ contract MyBoi is
     uint256 public constant MAX_SUPLLY = 1000;
     uint256 private _idCounter;
 
-    constructor(string memory name_, string memory symbol_, string memory baseUri_) ERC721(name_, symbol_) {
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        string memory baseUri_,
+        address paymentToken_,
+        uint256 amount_
+    ) ERC721(name_, symbol_) {
         address sender = _msgSender();
         _setBaseURI(baseUri_);
         _setupPrimarySaleRecipient(sender);
+        _setPayment(paymentToken_, amount_);
         _idCounter = 1;
     }
 
@@ -42,7 +49,6 @@ contract MyBoi is
 
     function setBaseTokenURI(string calldata baseTokenURI_) external override onlyOwner {
         _setBaseURI(baseTokenURI_);
-        emit NewBaseTokenURI(baseTokenURI_);
     }
 
     function setupPrimarySaleRecipient(address recipient_) external override onlyOwner {
@@ -56,13 +62,13 @@ contract MyBoi is
     function buy(address paymentToken_, uint256 quantity_) external payable override nonReentrant {
         address sender = _msgSender();
         uint256 amount = _paymentAmount[paymentToken_];
-        if (amount == 0) revert MyBoi__ZeroValue();
-
         uint256 tokenId = _idCounter;
 
         if (tokenId + quantity_ > MAX_SUPLLY) revert MyBoi__ExceedLimit();
 
         uint256 total = amount * quantity_;
+
+        if (total == 0) revert MyBoi__ZeroValue();
 
         if (paymentToken_ == address(0)) {
             if (msg.value < total) revert MyBoi__InsufficientBalance();
