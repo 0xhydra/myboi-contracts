@@ -5,10 +5,11 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ERC721, ERC721Burnable } from "./base/ERC721/extensions/ERC721Burnable.sol";
 import { ERC721Permit } from "./base/ERC721/extensions/ERC721Permit.sol";
 import { ERC721URIStorage } from "./base/ERC721/extensions/ERC721URIStorage.sol";
+import { PaymentToken } from "./internal/PaymentToken.sol";
 import { PrimarySaleRecipient } from "./internal/PrimarySaleRecipient.sol";
 import { ReentrancyGuard } from "./internal/ReentrancyGuard.sol";
-import { IERC721A } from "./interfaces/IERC721A.sol";
 import { IMyBoi } from "./interfaces/IMyBoi.sol";
+import { SafeTransferLib } from "./lib/SafeTransfer.sol";
 
 contract MyBoi is
     IMyBoi,
@@ -17,6 +18,7 @@ contract MyBoi is
     ERC721Permit,
     ERC721URIStorage,
     Ownable,
+    PaymentToken,
     PrimarySaleRecipient,
     ReentrancyGuard
 {
@@ -47,11 +49,40 @@ contract MyBoi is
         _setupPrimarySaleRecipient(recipient_);
     }
 
-    function buy(uint256 quantity_) external payable override nonReentrant {
-        if (_idCounter + quantity_ > MAX_SUPLLY) revert MyBoi__ExceedLimit();
+    function setPayment(address token_, uint256 amount_) external override onlyOwner {
+        _setPayment(token_, amount_);
+    }
 
+    function buy(address paymentToken_, uint256 quantity_) external payable override nonReentrant {
         address sender = _msgSender();
-        _safeMint(sender, quantity_);
+        uint256 amount = _paymentAmount[paymentToken_];
+        if (amount == 0) revert MyBoi__ZeroValue();
+
+        uint256 tokenId = _idCounter;
+
+        if (tokenId + quantity_ > MAX_SUPLLY) revert MyBoi__ExceedLimit();
+
+        uint256 total = amount * quantity_;
+
+        if (paymentToken_ == address(0)) {
+            if (msg.value < total) revert MyBoi__InsufficientBalance();
+            SafeTransferLib.safeTransferETH(_recipient, total);
+        } else {
+            SafeTransferLib.safeTransferFrom(paymentToken_, sender, _recipient, total);
+        }
+
+        _batchMint(sender, tokenId, quantity_);
+    }
+
+    function _batchMint(address account_, uint256 tokenId_, uint256 totalMint_) internal {
+        for (uint256 i; i < totalMint_; ) {
+            unchecked {
+                _safeMint(account_, tokenId_);
+                ++tokenId_;
+                ++i;
+            }
+        }
+        _idCounter = tokenId_;
     }
 
     // The following functions are overrides required by Solidity.
@@ -64,7 +95,7 @@ contract MyBoi is
         return _baseUri;
     }
 
-    function _domainNameAndVersion() internal pure override returns (string memory name, string memory version) {
+    function _domainNameAndVersion() internal pure override returns (string memory, string memory) {
         return ("MyBoi", "1");
     }
 }
