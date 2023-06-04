@@ -165,6 +165,17 @@ contract ERC721A is IERC721A {
         }
     }
 
+    /**
+     * @dev Returns the total amount of tokens minted in the contract.
+     */
+    function _totalMinted() internal view virtual returns (uint256) {
+        // Counter underflow is impossible as `_currentIndex` does not decrement,
+        // and it is initialized to `_startTokenId()`.
+        unchecked {
+            return _currentIndex - _startTokenId();
+        }
+    }
+
     // =============================================================
     //                    ADDRESS DATA OPERATIONS
     // =============================================================
@@ -404,7 +415,7 @@ contract ERC721A is IERC721A {
         address approvedAddress,
         address owner,
         address msgSender
-    ) private pure returns (bool result) {
+    ) internal pure returns (bool result) {
         assembly {
             // Mask `owner` to the lower 160 bits, in case the upper bits somehow aren't clean.
             owner := and(owner, _BITMASK_ADDRESS)
@@ -413,6 +424,11 @@ contract ERC721A is IERC721A {
             // `msgSender == owner || msgSender == approvedAddress`.
             result := or(eq(msgSender, owner), eq(msgSender, approvedAddress))
         }
+    }
+
+    function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual returns (bool) {
+        address owner = ownerOf(tokenId);
+        return (spender == owner || isApprovedForAll(owner, spender) || getApproved(tokenId) == spender);
     }
 
     /**

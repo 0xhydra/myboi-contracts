@@ -2,12 +2,10 @@
 
 pragma solidity 0.8.19;
 
-import { IERC721A } from "../IERC721A.sol";
-
 /**
  * @dev Interface of ERC721ABurnable.
  */
-interface IERC721ABurnable is IERC721A {
+interface IERC721Burnable {
     /**
      * @dev Burns `tokenId`. See {ERC721A-_burn}.
      *
