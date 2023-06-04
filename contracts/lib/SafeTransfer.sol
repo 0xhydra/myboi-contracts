@@ -15,7 +15,7 @@ library SafeTransferLib {
             success := call(gas(), to, amount, 0, 0, 0, 0)
         }
 
-        require(success, "ETH_TRANSFER_FAILED");
+        require(success, "ETF");
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -48,6 +48,6 @@ library SafeTransferLib {
             )
         }
 
-        require(success, "TRANSFER_FROM_FAILED");
+        require(success, "STF");
     }
 }

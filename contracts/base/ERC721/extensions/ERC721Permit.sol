@@ -27,7 +27,7 @@ abstract contract ERC721Permit is IERC4494, EIP712, ERC721 {
     /// @param tokenId token id
     /// @return current token nonce
     function nonces(uint256 tokenId) public view override returns (uint256) {
-        require(_exists(tokenId), "!UNKNOWN");
+        require(_exists(tokenId), "!EXIST");
         return _nonces[tokenId];
     }
 
