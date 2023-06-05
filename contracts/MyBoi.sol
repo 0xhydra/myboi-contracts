@@ -77,7 +77,7 @@ contract MyBoi is
      * @return The total number of tokens minted.
      */
     function totalMinted() external view returns (uint256) {
-        return _idCounter;
+        return _idCounter - 1;
     }
 
     /**
@@ -116,7 +116,7 @@ contract MyBoi is
         uint256 tokenId = _idCounter;
 
         unchecked {
-            if (tokenId + quantity_ > MAX_SUPLLY) revert MyBoi__ExceedLimit();
+            if (tokenId + quantity_ - 1 > MAX_SUPLLY) revert MyBoi__ExceedLimit();
         }
 
         uint256 total = amount * quantity_;
