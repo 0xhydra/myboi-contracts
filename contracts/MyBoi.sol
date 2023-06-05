@@ -130,6 +130,7 @@ contract MyBoi is
             SafeTransferLib.safeTransferFrom(paymentToken_, sender, _recipient, total);
         }
 
+        emit BatchMint(sender, tokenId, quantity_);
         _batchMint(sender, tokenId, quantity_);
     }
 

@@ -31,7 +31,12 @@ const deployAndVerify = async (
 };
 
 async function main() {
-  await deployAndVerify("", [], true);
+  await deployAndVerify(
+    "MyBoi",
+    ["MyBoi", "MyBoi", "", ethers.constants.AddressZero, "1000000000000000"],
+    true,
+    "contracts/MyBoi.sol:MyBoi",
+  );
 }
 
 // We recommend this pattern to be able to use async/await everywhere
